@@ -1,9 +1,10 @@
+import authService from "@/services/authService";
 import router from "@/router";
 
 // 導航守衛 Navigation Guards
 router.beforeEach(async (to, from, next) => {
     if (to.meta.requiredAuth) {
-        const checkResult = true; //await authService.isLogin();
+        const checkResult = await authService.isLogin();
         // 驗證是否已經登入
         if (checkResult) {
             // 已登入，繼續執行
