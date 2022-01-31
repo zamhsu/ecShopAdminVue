@@ -16,18 +16,26 @@
     </button>
     <div class="navbar-nav">
       <div class="nav-item text-nowrap">
-        <a class="nav-link px-3" href="#">登出</a>
+        <a class="nav-link px-3" href="#" @click.prevent="logout()">登出</a>
       </div>
     </div>
   </header>
 </template>
 
 <script lang="ts">
+import router from "@/router";
+import authService from "@/services/authService";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   setup() {
-    return {};
+    function logout() {
+      authService.logout();
+      router.push({ name: "Login" });
+    }
+    return {
+      logout,
+    };
   },
 });
 </script>

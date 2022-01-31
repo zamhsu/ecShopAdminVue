@@ -10,7 +10,7 @@ const service = Axios.create({
 /**
  * 請求攔截器
  */
- service.interceptors.request.use(async (config: AxiosRequestConfig) => {
+service.interceptors.request.use(async (config: AxiosRequestConfig) => {
     const token = authService.getAccessToken();
     if (token) {
         const tokenType = 'Bearer';
@@ -25,14 +25,14 @@ const service = Axios.create({
 /**
  * 回應攔截器
  */
- service.interceptors.response.use(
+service.interceptors.response.use(
     (response: AxiosResponse) => {
         return response;
     },
     (error: AxiosError) => {
         if (error?.response?.status === 401) {
             if (router.currentRoute.value.path !== '/login') {
-                router.push('/login');
+                router.push({ name: "Login" });
             }
         }
 
