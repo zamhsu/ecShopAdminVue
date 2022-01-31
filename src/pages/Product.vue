@@ -53,7 +53,7 @@
       </tbody>
     </table>
 
-    <!-- <Pagination :pages="pagination" @emitPage="getProducts"></Pagination> -->
+    <Pagination :pages="pagination" @emitPage="getProducts"></Pagination>
 
     <!-- productModal -->
     <!-- <div
@@ -284,6 +284,7 @@
 </template>
 
 <script lang="ts">
+import Pagination from "@/components/Pagination.vue";
 import { ProductDisplayModel } from "@/models/productModel";
 import { PaginationModel } from "@/models/PaginationModel";
 import productApi from "@/api/product";
@@ -291,6 +292,9 @@ import { defineComponent, ref } from "vue";
 import { currency } from "@/utils/filter";
 
 export default defineComponent({
+  components: {
+    Pagination,
+  },
   setup() {
     const pageSize = 10;
     let products = ref<ProductDisplayModel[]>([]);
@@ -298,9 +302,9 @@ export default defineComponent({
     let isNew = ref<boolean>(false);
     let isLoading = ref<boolean>(false);
 
-    getProducts(1);
+    getProducts();
 
-    function getProducts(page: number) {
+    function getProducts(page = 1) {
       isLoading.value = true;
 
       productApi.getPaged(pageSize, page).then((response) => {
