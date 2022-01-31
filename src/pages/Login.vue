@@ -43,9 +43,7 @@ import router from "@/router";
 import { defineComponent, ref } from "vue";
 import authApi from "@/api/authority";
 import { LoginModel } from "@/models/loginModel";
-import { RequestData } from "@/models/requestData";
 import authService from "@/services/authService";
-import stringUtils from "@/utils/stringUtils";
 
 export default defineComponent({
   setup() {
@@ -55,17 +53,13 @@ export default defineComponent({
 
     function login() {
       errorMessage.value = "";
+
       let loginModel: LoginModel = {
         account: account.value,
         password: pwd.value,
       };
 
-      let requestData: RequestData<LoginModel> = {
-          data: loginModel,
-          timeZone: stringUtils.getClientTimeZone()
-      };
-
-      authApi.login(requestData).then((response) => {
+      authApi.login(loginModel).then((response) => {
         if (response.isSuccess) {
           authService.setAccessToken(response.data);
           router.push({ name: "Welcome" });
