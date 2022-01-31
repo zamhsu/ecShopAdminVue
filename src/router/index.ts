@@ -4,6 +4,8 @@ import Login from "@/pages/Login.vue";
 import MainLayout from "@/components/MainLayout.vue";
 import NotFound from "@/pages/NotFound.vue";
 
+import { adminRoutes } from "./admin";
+
 export const routes: Array<RouteRecordRaw> = [
     {
         path: '/login',
@@ -20,6 +22,7 @@ export const routes: Array<RouteRecordRaw> = [
                 name: 'Welcome',
                 component: () => import(/* webpackChunkName: "welcome" */ '../pages/Welcome.vue'),
             },
+            ...adminRoutes
         ],
         meta: {
             requiredAuth: true // children不寫默認使用parent的meta
