@@ -1,6 +1,7 @@
 <template>
   <div>
     <Navbar />
+    <AlertMessage />
     <div class="container-fluid">
       <div class="row">
         <Sidebar />
@@ -15,12 +16,14 @@
 <script lang="ts">
 import Navbar from "@/components/wrappers/Navbar.vue";
 import Sidebar from "@/components/wrappers/Sidebar.vue";
+import AlertMessage from "@/components/AlertMessage.vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   components: {
     Navbar,
     Sidebar,
+    AlertMessage,
   },
   name: "MainLayout",
 });
