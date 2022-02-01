@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <loading v-model:active="isLoading"/> -->
+    <Loading v-model:active="isLoading"/>
     <div class="text-end">
       <button class="btn btn-primary mt-4" @click="openProductModal(true)">
         建立新產品
@@ -53,7 +53,11 @@
       </tbody>
     </table>
 
-    <Pagination :pages="pagination" @emitPage="getProducts"></Pagination>
+    <Pagination
+      :pages="pagination"
+      @emitPage="getProducts"
+      v-if="pagination"
+    ></Pagination>
 
     <!-- productModal -->
     <!-- <div
@@ -233,66 +237,30 @@
     </div> -->
 
     <!-- delProductModal -->
-    <!-- <div
-      class="modal fade"
-      id="delProductModal"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="delProductModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog" role="document">
-        <div class="modal-content border-0">
-          <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title" id="delProductModalLabel">
-              <span>刪除產品</span>
-            </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            是否刪除
-            <strong class="text-danger">{{ tempProduct.title }}</strong>
-            商品(刪除後將無法恢復)。
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-outline-secondary"
-              data-dismiss="modal"
-            >
-              取消
-            </button>
-            <button
-              type="button"
-              class="btn btn-danger"
-              @click="deleteProduct()"
-            >
-              確認刪除
-            </button>
-          </div>
-        </div>
-      </div>
-    </div> -->
+    <DeleteModal
+      :itemName="deleteModel.name"
+      :visibaleModal="showDeleteModal"
+      :errorMessage="deleteErrorMessage"
+      @delete="deleteProduct()"
+      @close="closeDeleteModal()"
+    />
   </div>
 </template>
 
 <script lang="ts">
+import DeleteModal from "@/components/DeleteModal.vue";
 import Pagination from "@/components/Pagination.vue";
 import { ProductDisplayModel } from "@/models/productModel";
 import { PaginationModel } from "@/models/PaginationModel";
+import { DeleteModel } from "@/models/generalModel";
 import productApi from "@/api/product";
 import { defineComponent, ref } from "vue";
+import { emitter } from "@/utils/eventBus";
 import { currency } from "@/utils/filter";
 
 export default defineComponent({
   components: {
+    DeleteModal,
     Pagination,
   },
   setup() {
@@ -301,6 +269,12 @@ export default defineComponent({
     let pagination = ref<PaginationModel>();
     let isNew = ref<boolean>(false);
     let isLoading = ref<boolean>(false);
+    let deleteModel = ref<DeleteModel>({
+      guid: "",
+      name: "",
+    });
+    let deleteErrorMessage = ref<string>("");
+    let showDeleteModal = ref<boolean>(false);
 
     getProducts();
 
@@ -317,12 +291,53 @@ export default defineComponent({
       });
     }
 
+    function deleteProduct() {
+      isLoading.value = true;
+
+      productApi.deleteOne(deleteModel.value.guid).then((response) => {
+        if (response.isSuccess) {
+          getProducts();
+          emitter.emit("alertEvent", {
+            message: "成功",
+            status: "success",
+          });
+        } else {
+          emitter.emit("alertEvent", {
+            message: `失敗，${response.message}`,
+            status: "warning",
+          });
+        }
+
+        isLoading.value = false;
+      });
+      showDeleteModal.value = false;
+    }
+
+    function openDeleteModal(product: ProductDisplayModel): void {
+      deleteModel.value = {
+        guid: product.guid,
+        name: product.title,
+      };
+
+      deleteErrorMessage.value = "";
+      showDeleteModal.value = true;
+    }
+    function closeDeleteModal() {
+      showDeleteModal.value = false;
+    }
+
     return {
       products,
       pagination,
       isNew,
       isLoading,
+      deleteModel,
+      showDeleteModal,
+      deleteErrorMessage,
       getProducts,
+      deleteProduct,
+      openDeleteModal,
+      closeDeleteModal,
       currency,
     };
   },

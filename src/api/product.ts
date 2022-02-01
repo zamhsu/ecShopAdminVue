@@ -16,4 +16,15 @@ export default {
 
         return data;
     },
+
+    /**
+     * 刪除一筆產品
+     * @guid 產品Guid
+     * @returns 
+     */
+     async deleteOne(guid: string): Promise<ResponseData<boolean>> {
+        const { data } = await axios.delete(`admin/product/${guid}`);
+
+        return data;
+    },
 }
