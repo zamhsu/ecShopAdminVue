@@ -1,3 +1,4 @@
+import { fullDateTime } from "@/utils/filter";
 import { PaginationModel } from "./PaginationModel";
 
 export interface ProductDisplayModel {
@@ -11,8 +12,8 @@ export interface ProductDisplayModel {
     originPrice: number,
     price: number,
     description: string,
-    startDisplay: Date,
-    endDisplay: Date,
+    startDisplay: Date | string,
+    endDisplay: Date | string,
     imageUrl: string,
     memo: string,
     statusId: number,
@@ -22,4 +23,25 @@ export interface ProductDisplayModel {
 export interface ProductPagedDisplayModel {
     products: ProductDisplayModel[],
     pagination: PaginationModel
+}
+
+export function emptyProductDisplayModel(): ProductDisplayModel {
+    return {
+        guid: "",
+        title: "",
+        categoryId: 0,
+        categoryString: "",
+        unitId: 0,
+        unitString: "",
+        quantity: 0,
+        originPrice: 0,
+        price: 0,
+        description: "",
+        startDisplay: fullDateTime(new Date(Date.now())),
+        endDisplay: fullDateTime(new Date(Date.now())),
+        imageUrl: "",
+        memo: "",
+        statusId: 0,
+        statusString: ""
+    }
 }

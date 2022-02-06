@@ -1,8 +1,8 @@
 <template>
   <div>
-    <Loading v-model:active="isLoading"/>
+    <Loading v-model:active="isLoading" />
     <div class="text-end">
-      <button class="btn btn-primary mt-4" @click="openProductModal(true)">
+      <button class="btn btn-primary mt-4" @click="openEditModal(true)">
         建立新產品
       </button>
     </div>
@@ -37,7 +37,7 @@
             <div class="btn-group">
               <button
                 class="btn btn-outline-primary btn-sm"
-                @click="openProductModal(false, item)"
+                @click="openEditModal(false, item)"
               >
                 編輯
               </button>
@@ -60,7 +60,7 @@
     ></Pagination>
 
     <!-- productModal -->
-    <!-- <div
+    <div
       class="modal fade"
       id="productModal"
       tabindex="-1"
@@ -70,46 +70,28 @@
     >
       <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content border-0">
-          <div class="modal-header bg-dark text-white">
+          <div class="modal-header">
             <h5 class="modal-title" id="productModalLabel">
-              <span>新增產品</span>
+              <span>編輯產品</span>
             </h5>
             <button
               type="button"
-              class="close"
-              data-dismiss="modal"
+              class="btn-close"
+              data-bs-dismiss="modal"
               aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
+            ></button>
           </div>
           <div class="modal-body">
             <div class="row">
               <div class="col-sm-4">
-                <div class="form-group">
-                  <label for="image">輸入圖片網址</label>
+                <div class="mb-3">
+                  <label for="image" class="form-label">輸入圖片網址</label>
                   <input
                     type="text"
                     class="form-control"
                     id="image"
                     v-model="tempProduct.imageUrl"
                     placeholder="請輸入圖片連結"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="customFile"
-                    >或 上傳圖片
-                    <i
-                      class="fas fa-spinner fa-spin"
-                      v-if="status.fileUploading"
-                    ></i>
-                  </label>
-                  <input
-                    type="file"
-                    id="customFile"
-                    class="form-control"
-                    ref="files"
-                    @change="uploadFile()"
                   />
                 </div>
                 <img
@@ -120,8 +102,8 @@
                 />
               </div>
               <div class="col-sm-8">
-                <div class="form-group">
-                  <label for="title">標題</label>
+                <div class="mb-3">
+                  <label for="title" class="form-label">標題</label>
                   <input
                     type="text"
                     class="form-control"
@@ -131,42 +113,69 @@
                   />
                 </div>
 
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="category">分類</label>
-                    <input
-                      type="text"
-                      class="form-control"
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label for="category" class="form-label">分類</label>
+                    <select
                       id="category"
-                      v-model="tempProduct.category"
-                      placeholder="請輸入分類"
-                    />
-                  </div>
-                  <div class="form-group col-md-6">
-                    <label for="price">單位</label>
-                    <input
-                      type="unit"
                       class="form-control"
-                      id="unit"
-                      v-model="tempProduct.unit"
-                      placeholder="請輸入單位"
-                    />
+                      v-model="tempProduct.categoryId"
+                    >
+                      <option value="0" disabled>請選擇分類</option>
+                      <option
+                        v-for="category in categoryTypes"
+                        :key="category.id"
+                        :value="category.id"
+                      >
+                        {{ category.name }}
+                      </option>
+                    </select>
                   </div>
                 </div>
 
-                <div class="form-row">
-                  <div class="form-group col-md-6">
-                    <label for="origin_price">原價</label>
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label for="price" class="form-label">數量</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="quantity"
+                      v-model="tempProduct.quantity"
+                      placeholder="請輸入數量"
+                    />
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label for="unit" class="form-label">單位</label>
+                    <select
+                      id="unit"
+                      class="form-control"
+                      v-model="tempProduct.unitId"
+                    >
+                      <option value="0" disabled>請選擇單位</option>
+                      <option
+                        v-for="unit in unitTypes"
+                        :key="unit.id"
+                        :value="unit.id"
+                      >
+                        {{ unit.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label for="origin_price" class="form-label">原價</label>
                     <input
                       type="number"
                       class="form-control"
                       id="origin_price"
-                      v-model="tempProduct.origin_price"
+                      v-model="tempProduct.originPrice"
                       placeholder="請輸入原價"
                     />
                   </div>
-                  <div class="form-group col-md-6">
-                    <label for="price">售價</label>
+                  <div class="mb-3 col-md-6">
+                    <label for="price" class="form-label">售價</label>
                     <input
                       type="number"
                       class="form-control"
@@ -176,10 +185,33 @@
                     />
                   </div>
                 </div>
+
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label for="startDisplay" class="form-label"
+                      >上架日期</label
+                    >
+                    <FlatPickr
+                      :elementId="'startDisplay'"
+                      :config="generalFpConfig"
+                      v-model:datetime="tempProduct.startDisplay"
+                      class="form-control"
+                    ></FlatPickr>
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label for="endDisplay" class="form-label">下架日期</label>
+                    <FlatPickr
+                      :elementId="'endDisplay'"
+                      :config="generalFpConfig"
+                      v-model:datetime="tempProduct.endDisplay"
+                      class="form-control"
+                    ></FlatPickr>
+                  </div>
+                </div>
                 <hr />
 
-                <div class="form-group">
-                  <label for="description">產品描述</label>
+                <div class="mb-3">
+                  <label for="description" class="form-label">產品描述</label>
                   <textarea
                     type="text"
                     class="form-control"
@@ -188,30 +220,16 @@
                     placeholder="請輸入產品描述"
                   ></textarea>
                 </div>
-                <div class="form-group">
-                  <label for="content">說明內容</label>
+
+                <div class="mb-3">
+                  <label for="memo" class="form-label">管理員備註</label>
                   <textarea
                     type="text"
                     class="form-control"
-                    id="content"
-                    v-model="tempProduct.content"
-                    placeholder="請輸入產品說明內容"
+                    id="memo"
+                    v-model="tempProduct.memo"
+                    placeholder="請輸入管理員備註"
                   ></textarea>
-                </div>
-                <div class="form-group">
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      id="is_enabled"
-                      v-model="tempProduct.is_enabled"
-                      :true-value="1"
-                      :false-value="0"
-                    />
-                    <label class="form-check-label" for="is_enabled">
-                      是否啟用
-                    </label>
-                  </div>
                 </div>
               </div>
             </div>
@@ -220,21 +238,17 @@
             <button
               type="button"
               class="btn btn-outline-secondary"
-              data-dismiss="modal"
+              data-bs-dismiss="modal"
             >
               取消
             </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="editProduct()"
-            >
+            <button type="button" class="btn btn-primary" @click="submitEdit()">
               確認
             </button>
           </div>
         </div>
       </div>
-    </div> -->
+    </div>
 
     <!-- delProductModal -->
     <DeleteModal
@@ -248,26 +262,40 @@
 </template>
 
 <script lang="ts">
+import { Modal } from "bootstrap";
 import DeleteModal from "@/components/DeleteModal.vue";
 import Pagination from "@/components/Pagination.vue";
-import { ProductDisplayModel } from "@/models/productModel";
+import FlatPickr from "@/components/inputs/FlatPickr.vue";
+import {
+  ProductDisplayModel,
+  emptyProductDisplayModel,
+} from "@/models/productModel";
 import { PaginationModel } from "@/models/PaginationModel";
+import { ProductUnitTypeDisplayModel } from "@/models/productUnitTypeModel";
+import { ProductCategoryTypeDisplayModel } from "@/models/productCategoryTypeModel";
 import { DeleteModel } from "@/models/generalModel";
 import productApi from "@/api/product";
-import { defineComponent, ref } from "vue";
+import productUnitTypeApi from "@/api/productUnitType";
+import productCategoryTypeApi from "@/api/productCategoryType";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import { emitter } from "@/utils/eventBus";
-import { currency } from "@/utils/filter";
+import { currency, fullDateTime, onlyDate } from "@/utils/filter";
+import { Options } from "flatpickr/dist/types/options";
 
 export default defineComponent({
   components: {
     DeleteModal,
     Pagination,
+    FlatPickr,
   },
   setup() {
     const pageSize = 10;
     let products = ref<ProductDisplayModel[]>([]);
+    let unitTypes = ref<ProductUnitTypeDisplayModel[]>();
+    let categoryTypes = ref<ProductCategoryTypeDisplayModel[]>();
+    let tempProduct = ref<ProductDisplayModel>(emptyProductDisplayModel());
     let pagination = ref<PaginationModel>();
-    let isNew = ref<boolean>(false);
+    let isNewProduct = ref<boolean>(false);
     let isLoading = ref<boolean>(false);
     let deleteModel = ref<DeleteModel>({
       guid: "",
@@ -275,8 +303,22 @@ export default defineComponent({
     });
     let deleteErrorMessage = ref<string>("");
     let showDeleteModal = ref<boolean>(false);
+    let productModal: Modal;
+    let generalFpConfig = ref<Options>();
 
     getProducts();
+    getProductParas();
+    initFpConfig();
+
+    onMounted(() => {
+      productModal = new Modal(
+        document.getElementById("productModal") as HTMLElement
+      );
+    });
+
+    onUnmounted(() => {
+      productModal.dispose();
+    });
 
     function getProducts(page = 1) {
       isLoading.value = true;
@@ -291,6 +333,58 @@ export default defineComponent({
       });
     }
 
+    function getProductParas() {
+      productUnitTypeApi.getAll().then((response) => {
+        if (response.isSuccess) {
+          unitTypes.value = response.data;
+        }
+      });
+
+      productCategoryTypeApi.getAll().then((response) => {
+        if (response.isSuccess) {
+          categoryTypes.value = response.data;
+        }
+      });
+    }
+
+    function createProduct() {
+      console.log("Create");
+    }
+
+    function updateProduct() {
+      isLoading.value = true;
+
+      tempProduct.value.startDisplay = new Date(tempProduct.value.startDisplay);
+      tempProduct.value.endDisplay = new Date(tempProduct.value.endDisplay);
+
+      productApi.updateOne(tempProduct.value).then((response) => {
+        if (response.isSuccess) {
+          getProducts();
+          closeEditModal();
+          emitter.emit("alertEvent", {
+            message: "修改成功",
+            status: "success",
+          });
+        } else {
+          closeEditModal();
+          emitter.emit("alertEvent", {
+            message: `修改失敗，${response.message}`,
+            status: "warning",
+          });
+        }
+
+        isLoading.value = false;
+      });
+    }
+
+    function submitEdit() {
+      if (isNewProduct.value) {
+        createProduct();
+      } else {
+        updateProduct();
+      }
+    }
+
     function deleteProduct() {
       isLoading.value = true;
 
@@ -298,12 +392,12 @@ export default defineComponent({
         if (response.isSuccess) {
           getProducts();
           emitter.emit("alertEvent", {
-            message: "成功",
+            message: "刪除成功",
             status: "success",
           });
         } else {
           emitter.emit("alertEvent", {
-            message: `失敗，${response.message}`,
+            message: `刪除失敗，${response.message}`,
             status: "warning",
           });
         }
@@ -311,6 +405,27 @@ export default defineComponent({
         isLoading.value = false;
       });
       showDeleteModal.value = false;
+    }
+
+    function openEditModal(isNew: boolean, product?: ProductDisplayModel) {
+      if (isNew) {
+        tempProduct.value = emptyProductDisplayModel();
+        isNewProduct.value = true;
+      } else {
+        tempProduct.value = Object.assign({}, product);
+        isNewProduct.value = false;
+      }
+
+      tempProduct.value.startDisplay = fullDateTime(
+        tempProduct.value.startDisplay
+      );
+      tempProduct.value.endDisplay = fullDateTime(tempProduct.value.endDisplay);
+
+      productModal.show();
+    }
+
+    function closeEditModal() {
+      productModal.hide();
     }
 
     function openDeleteModal(product: ProductDisplayModel): void {
@@ -322,23 +437,41 @@ export default defineComponent({
       deleteErrorMessage.value = "";
       showDeleteModal.value = true;
     }
+
     function closeDeleteModal() {
       showDeleteModal.value = false;
     }
 
+    function initFpConfig() {
+      generalFpConfig.value = {
+        enableTime: true,
+        allowInput: true,
+        dateFormat: "Y-m-d H:i:S",
+      };
+    }
+
     return {
       products,
+      unitTypes,
+      categoryTypes,
+      tempProduct,
       pagination,
-      isNew,
+      isNewProduct,
       isLoading,
       deleteModel,
       showDeleteModal,
       deleteErrorMessage,
+      generalFpConfig,
       getProducts,
+      submitEdit,
       deleteProduct,
+      openEditModal,
+      closeEditModal,
       openDeleteModal,
       closeDeleteModal,
       currency,
+      fullDateTime,
+      onlyDate,
     };
   },
 });
