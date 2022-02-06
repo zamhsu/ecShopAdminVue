@@ -18,6 +18,22 @@ export default {
     },
 
     /**
+     * 新增一筆產品
+     * @param product 產品資料
+     * @returns 
+     */
+     async createOne(product: ProductDisplayModel): Promise<ResponseData<boolean>> {
+        const requestData: RequestData<ProductDisplayModel> = {
+            data: product,
+            timeZone: stringUtils.getClientTimeZone()
+        };
+
+        const { data } = await axios.post("admin/product", requestData);
+
+        return data;
+    },
+
+    /**
      * 更新一筆產品
      * @param product 產品資料
      * @returns 

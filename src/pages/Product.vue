@@ -348,7 +348,29 @@ export default defineComponent({
     }
 
     function createProduct() {
-      console.log("Create");
+      isLoading.value = true;
+
+      tempProduct.value.startDisplay = new Date(tempProduct.value.startDisplay);
+      tempProduct.value.endDisplay = new Date(tempProduct.value.endDisplay);
+
+      productApi.createOne(tempProduct.value).then((response) => {
+        if (response.isSuccess) {
+          getProducts();
+          closeEditModal();
+          emitter.emit("alertEvent", {
+            message: "新增成功",
+            status: "success",
+          });
+        } else {
+          closeEditModal();
+          emitter.emit("alertEvent", {
+            message: `新增失敗，${response.message}`,
+            status: "warning",
+          });
+        }
+
+        isLoading.value = false;
+      });
     }
 
     function updateProduct() {
