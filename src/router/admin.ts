@@ -9,4 +9,12 @@ export const adminRoutes: RouteRecordRaw[] = [
             requiredAuth: true
         }
     },
+    {
+        path: 'order',
+        name: 'Order',
+        component: () => import(/* webpackChunkName: "admin" */ '../pages/Order.vue'),
+        meta: {
+            requiredAuth: true
+        }
+    },
 ]

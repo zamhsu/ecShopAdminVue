@@ -25,10 +25,10 @@
           </router-link>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">
+          <router-link :to="{ name: 'Order' }" class="nav-link">
             <i class="fas fa-list"></i>
             訂單列表
-          </a>
+          </router-link>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">

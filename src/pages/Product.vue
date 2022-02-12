@@ -270,7 +270,7 @@ import {
   ProductDisplayModel,
   emptyProductDisplayModel,
 } from "@/models/productModel";
-import { PaginationModel } from "@/models/PaginationModel";
+import { PaginationModel } from "@/models/paginationModel";
 import { ProductUnitTypeDisplayModel } from "@/models/productUnitTypeModel";
 import { ProductCategoryTypeDisplayModel } from "@/models/productCategoryTypeModel";
 import { DeleteModel } from "@/models/generalModel";
