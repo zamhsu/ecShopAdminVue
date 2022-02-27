@@ -65,7 +65,123 @@
       v-if="pagination"
     ></Pagination>
 
-    <!-- delProductModal -->
+    <!-- couponModal -->
+    <div
+      class="modal fade"
+      id="couponModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="couponModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content border-0">
+          <div class="modal-header">
+            <h5 class="modal-title" id="couponModalLabel">
+              <span>編輯優惠券</span>
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div>
+              <span class="text-danger">* 編輯時只會修改【名稱】欄位</span>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label for="title" class="form-label">名稱</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="title"
+                      v-model="tempCoupon.title"
+                      placeholder="請輸入名稱"
+                    />
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label for="code" class="form-label">優惠碼</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="code"
+                      v-model="tempCoupon.code"
+                      placeholder="請輸入優惠碼"
+                    />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label for="discountPercentage" class="form-label"
+                      >折扣百分比</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="discountPercentage"
+                      v-model="tempCoupon.discountPercentage"
+                      placeholder="請輸入折扣百分比"
+                    />
+                    <span>範例：80 = 價格 * 80%（相當於八折）</span>
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label for="quantity" class="form-label">數量</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="quantity"
+                      v-model="tempCoupon.quantity"
+                      placeholder="請輸入數量"
+                    />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="mb-3 col-md-6">
+                    <label for="startDate" class="form-label">生效日</label>
+                    <FlatPickr
+                      :elementId="'startDate'"
+                      :config="generalFpConfig"
+                      v-model:datetime="tempCoupon.startDate"
+                      class="form-control"
+                    ></FlatPickr>
+                  </div>
+                  <div class="mb-3 col-md-6">
+                    <label for="expiredDate" class="form-label">到期日</label>
+                    <FlatPickr
+                      :elementId="'expiredDate'"
+                      :config="generalFpConfig"
+                      v-model:datetime="tempCoupon.expiredDate"
+                      class="form-control"
+                    ></FlatPickr>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              data-bs-dismiss="modal"
+            >
+              取消
+            </button>
+            <button type="button" class="btn btn-primary" @click="submitEdit()">
+              確認
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- delCouponModal -->
     <DeleteModal
       :itemName="deleteModel.name"
       :visibaleModal="showDeleteModal"
@@ -80,25 +196,32 @@
 import Pagination from "@/components/Pagination.vue";
 import FlatPickr from "@/components/inputs/FlatPickr.vue";
 import DeleteModal from "@/components/DeleteModal.vue";
-import { CouponDisplayModel } from "@/models/couponModel";
+import {
+  CouponDetailModel,
+  CouponDisplayModel,
+  emptyCouponDisplayModel,
+} from "@/models/couponModel";
 import { PaginationModel } from "@/models/PaginationModel";
 import { DeleteModel } from "@/models/generalModel";
 import { fullDateTime } from "@/utils/filter";
 import { emitter } from "@/utils/eventBus";
 import couponApi from "@/api/coupon";
-import { defineComponent, ref } from "vue";
+import { defineComponent, onBeforeUnmount, onMounted, ref } from "vue";
+import { Options } from "flatpickr/dist/types/options";
+import { Modal } from "bootstrap";
 
 export default defineComponent({
   components: {
     DeleteModal,
     Pagination,
-    //FlatPickr,
+    FlatPickr,
   },
   setup() {
     const pageSize = 10;
     let coupons = ref<CouponDisplayModel[]>([]);
     let pagination = ref<PaginationModel>();
-    //let isNewCoupon = ref<boolean>(false);
+    let tempCoupon = ref<CouponDetailModel>(emptyCouponDisplayModel());
+    let isNewCoupon = ref<boolean>(false);
     let isLoading = ref<boolean>(false);
     let deleteModel = ref<DeleteModel>({
       guid: "",
@@ -106,8 +229,21 @@ export default defineComponent({
     });
     let deleteErrorMessage = ref<string>("");
     let showDeleteModal = ref<boolean>(false);
+    let couponModal: Modal;
+    let generalFpConfig = ref<Options>();
 
     getCoupons();
+    initFpConfig();
+
+    onMounted(() => {
+      couponModal = new Modal(
+        document.getElementById("couponModal") as HTMLElement
+      );
+    });
+
+    onBeforeUnmount(() => {
+      couponModal.dispose();
+    });
 
     function getCoupons(page = 1) {
       isLoading.value = true;
@@ -119,6 +255,66 @@ export default defineComponent({
           isLoading.value = false;
         }
       });
+    }
+
+    function createCoupon() {
+      isLoading.value = true;
+
+      tempCoupon.value.startDate = new Date(tempCoupon.value.startDate);
+      tempCoupon.value.expiredDate = new Date(tempCoupon.value.expiredDate);
+
+      couponApi.createOne(tempCoupon.value).then((response) => {
+        if (response.isSuccess) {
+          getCoupons();
+          closeEditModal();
+          emitter.emit("alertEvent", {
+            message: "新增成功",
+            status: "success",
+          });
+        } else {
+          closeEditModal();
+          emitter.emit("alertEvent", {
+            message: `新增失敗，${response.message}`,
+            status: "warning",
+          });
+        }
+
+        isLoading.value = false;
+      });
+    }
+
+    function updateCoupon() {
+      isLoading.value = true;
+
+      tempCoupon.value.startDate = new Date(tempCoupon.value.startDate);
+      tempCoupon.value.expiredDate = new Date(tempCoupon.value.expiredDate);
+
+      couponApi.updateOne(tempCoupon.value).then((response) => {
+        if (response.isSuccess) {
+          getCoupons();
+          closeEditModal();
+          emitter.emit("alertEvent", {
+            message: "修改成功",
+            status: "success",
+          });
+        } else {
+          closeEditModal();
+          emitter.emit("alertEvent", {
+            message: `修改失敗，${response.message}`,
+            status: "warning",
+          });
+        }
+
+        isLoading.value = false;
+      });
+    }
+
+    function submitEdit() {
+      if (isNewCoupon.value) {
+        createCoupon();
+      } else {
+        updateCoupon();
+      }
     }
 
     function deleteCoupon() {
@@ -143,6 +339,26 @@ export default defineComponent({
       showDeleteModal.value = false;
     }
 
+    function openEditModal(isNew: boolean, coupon?: CouponDisplayModel) {
+      if (isNew) {
+        tempCoupon.value = emptyCouponDisplayModel();
+        isNewCoupon.value = true;
+      } else {
+        tempCoupon.value = Object.assign({}, coupon);
+        isNewCoupon.value = false;
+      }
+
+      tempCoupon.value.startDate = fullDateTime(tempCoupon.value.startDate);
+      tempCoupon.value.expiredDate = fullDateTime(tempCoupon.value.expiredDate);
+
+      couponModal.show();
+    }
+
+    function closeEditModal() {
+      tempCoupon.value = emptyCouponDisplayModel();
+      couponModal.hide();
+    }
+
     function openDeleteModal(coupon: CouponDisplayModel): void {
       deleteModel.value = {
         guid: coupon.id.toString(),
@@ -157,15 +373,30 @@ export default defineComponent({
       showDeleteModal.value = false;
     }
 
+    function initFpConfig() {
+      generalFpConfig.value = {
+        enableTime: true,
+        enableSeconds: true,
+        allowInput: true,
+        dateFormat: "Y-m-d H:i:S",
+      };
+    }
+
     return {
       isLoading,
       coupons,
       pagination,
+      tempCoupon,
+      isNewCoupon,
       deleteModel,
       showDeleteModal,
       deleteErrorMessage,
+      generalFpConfig,
       getCoupons,
+      submitEdit,
       deleteCoupon,
+      openEditModal,
+      closeEditModal,
       openDeleteModal,
       closeDeleteModal,
       fullDateTime,

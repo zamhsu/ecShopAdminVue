@@ -1,6 +1,8 @@
-import { CouponPagedDisplayModel } from "@/models/couponModel";
+import { CouponDisplayModel, CouponPagedDisplayModel } from "@/models/couponModel";
+import { RequestData } from "@/models/requestData";
 import { ResponseData } from "@/models/responseData";
 import axios from "@/utils/http";
+import stringUtils from "@/utils/stringUtils";
 
 export default {
     /**
@@ -11,6 +13,38 @@ export default {
      */
     async getPaged(pageSize = 10, page = 1): Promise<ResponseData<CouponPagedDisplayModel>> {
         const { data } = await axios.get(`admin/coupon?pageSize=${pageSize}&page=${page}`);
+
+        return data;
+    },
+
+    /**
+     * 新增一筆優惠券
+     * @param coupon 優惠券資料
+     * @returns 
+     */
+    async createOne(coupon: CouponDisplayModel): Promise<ResponseData<boolean>> {
+        const requestData: RequestData<CouponDisplayModel> = {
+            data: coupon,
+            timeZone: stringUtils.getClientTimeZone()
+        };
+
+        const { data } = await axios.post("admin/coupon", requestData);
+
+        return data;
+    },
+
+    /**
+     * 更新一筆優惠券
+     * @param coupon 優惠券資料
+     * @returns 
+     */
+    async updateOne(coupon: CouponDisplayModel): Promise<ResponseData<boolean>> {
+        const requestData: RequestData<CouponDisplayModel> = {
+            data: coupon,
+            timeZone: stringUtils.getClientTimeZone()
+        };
+
+        const { data } = await axios.put(`admin/coupon/${coupon.id}`, requestData);
 
         return data;
     },
