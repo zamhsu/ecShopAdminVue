@@ -31,10 +31,10 @@
           </router-link>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">
+          <router-link :to="{ name: 'Coupon' }" class="nav-link">
             <i class="fas fa-ticket-alt"></i>
             優惠券
-          </a>
+          </router-link>
         </li>
       </ul>
 

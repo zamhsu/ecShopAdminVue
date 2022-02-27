@@ -17,4 +17,12 @@ export const adminRoutes: RouteRecordRaw[] = [
             requiredAuth: true
         }
     },
+    {
+        path: 'coupon',
+        name: 'Coupon',
+        component: () => import(/* webpackChunkName: "admin" */ '../pages/Coupon.vue'),
+        meta: {
+            requiredAuth: true
+        }
+    },
 ]
