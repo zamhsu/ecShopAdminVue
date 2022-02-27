@@ -467,6 +467,7 @@ export default defineComponent({
     function initFpConfig() {
       generalFpConfig.value = {
         enableTime: true,
+        enableSeconds: true,
         allowInput: true,
         dateFormat: "Y-m-d H:i:S",
       };
