@@ -1,5 +1,5 @@
 import { fullDateTime } from "@/utils/filter";
-import { PaginationModel } from "./PaginationModel";
+import { PaginationModel } from "./paginationModel";
 
 export interface ProductDisplayModel {
     guid: string,

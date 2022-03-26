@@ -1,6 +1,6 @@
 import { OrderCouponDetailModel } from "./couponModel";
 import { OrderDetailModel } from "./orderDetailModel";
-import { PaginationModel } from "./PaginationModel";
+import { PaginationModel } from "./paginationModel";
 
 export interface OrderDisplayDetailModel {
     guid: string,

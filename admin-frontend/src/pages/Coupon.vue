@@ -201,7 +201,7 @@ import {
   CouponDisplayModel,
   emptyCouponDisplayModel,
 } from "@/models/couponModel";
-import { PaginationModel } from "@/models/PaginationModel";
+import { PaginationModel } from "@/models/paginationModel";
 import { DeleteModel } from "@/models/generalModel";
 import { fullDateTime } from "@/utils/filter";
 import { emitter } from "@/utils/eventBus";
