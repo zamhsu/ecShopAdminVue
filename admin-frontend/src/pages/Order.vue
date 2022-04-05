@@ -73,7 +73,13 @@
                     </tr>
                   </thead>
                   <tbody>
+                    <tr v-if="!orderDisplayDetail.orderDetails">
+                      <td colspan="4">
+                        <p class="text-center">沒有商品</p>
+                      </td>
+                    </tr>
                     <tr
+                      v-else
                       v-for="(item, index) in orderDisplayDetail.orderDetails"
                       :key="index"
                     >
@@ -104,15 +110,16 @@
                         <p class="text-center">沒有使用優惠券</p>
                       </td>
                     </tr>
-                    <tr
-                      v-for="(item, index) in orderDisplayDetail.couponDetail"
-                      :key="index"
-                    >
-                      <td>{{ item.itemNo }}</td>
-                      <td>{{ item.couponCode }}</td>
-                      <td>{{ item.quantity }}</td>
+                    <tr v-else>
+                      <td>{{ orderDisplayDetail.couponDetail.itemNo }}</td>
+                      <td>{{ orderDisplayDetail.couponDetail.couponCode }}</td>
+                      <td>{{ orderDisplayDetail.couponDetail.quantity }}</td>
                       <td>
-                        <span>{{ currency(item.total) }}</span>
+                        <span>
+                          -{{
+                            currency(orderDisplayDetail.couponDetail.total * -1)
+                          }}
+                        </span>
                       </td>
                     </tr>
                   </tbody>
@@ -232,9 +239,9 @@ export default defineComponent({
       orderApi.getOne(guid).then((response) => {
         if (response.isSuccess) {
           orderDisplayDetail.value = response.data;
-
-          isLoading.value = false;
         }
+
+        isLoading.value = false;
       });
     }
 
