@@ -21,7 +21,7 @@ export default {
      * @returns 
      */
     async getOne(guid: string): Promise<ResponseData<OrderDisplayDetailModel>> {
-        const { data } = await axios.get(`order/${guid}`);
+        const { data } = await axios.get(`admin/order/${guid}`);
 
         return data;
     },
